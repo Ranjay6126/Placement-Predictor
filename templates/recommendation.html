@@ -1,0 +1,430 @@
+{% extends 'base.html' %}
+
+{% block title %}Personalized Recommendations - Placement Predictor{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="text-center">Your Personalized Recommendations</h3>
+                </div>
+                <div class="card-body">
+                    <div class="placement-summary mb-4">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <h4 class="mb-3">Placement Prediction Summary</h4>
+                                <p class="lead">
+                                    {% if prediction == 'Placed' %}
+                                    Based on your profile, you have a <strong class="text-success">high chance</strong> of placement.
+                                    {% else %}
+                                    Based on your profile, you currently have a <strong class="text-danger">lower chance</strong> of placement.
+                                    {% endif %}
+                                </p>
+                                <p>
+                                    Our AI model has analyzed your data and identified key areas that may impact your placement opportunities.
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="placement-chart-container">
+                                    <canvas id="placementChartDoughnut"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="factor-analysis mb-5">
+                        <h4 class="mb-3">Key Factors Analysis</h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="factor-chart-container mb-4">
+                                    <canvas id="factorImportanceChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="factor-analysis-text">
+                                    <p>The chart shows the relative importance of different factors in determining placement outcomes:</p>
+                                    <ul>
+                                        {% for feature in feature_importances %}
+                                        <li><strong>{{ feature.feature }}:</strong> <span class="text-primary">{{ feature.importance }}% impact</span></li>
+                                        {% endfor %}
+                                    </ul>
+                                    <p class="mt-3">
+                                        {% if prediction == 'Placed' %}
+                                        Your strong performance in these key areas contributes positively to your placement prediction.
+                                        {% else %}
+                                        Focusing on improving these key areas could significantly enhance your placement chances.
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="recommendation-section">
+                        <h4 class="section-title mb-4">Personalized Recommendations</h4>
+                        
+                        {% if prediction == 'Placed' %}
+                        <!-- Recommendations for placed students -->
+                        <div class="alert alert-success">
+                            <h5><i class="bi bi-trophy-fill me-2"></i>Congratulations on your strong profile!</h5>
+                            <p>While your profile indicates a high chance of placement, here are some recommendations to further enhance your prospects:</p>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-4 mb-4">
+                                <div class="recommendation-card h-100">
+                                    <div class="recommendation-icon">
+                                        <i class="bi bi-briefcase-fill"></i>
+                                    </div>
+                                    <h5>Interview Preparation</h5>
+                                    <p>Prepare for technical and HR interviews to maximize your chances of converting placement opportunities.</p>
+                                    <div class="recommendation-links">
+                                        <a href="https://www.interviewbit.com/" target="_blank" class="btn btn-sm btn-outline-primary">InterviewBit</a>
+                                        <a href="https://www.geeksforgeeks.org/interview-preparation-for-software-developer/" target="_blank" class="btn btn-sm btn-outline-primary">GeeksforGeeks</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="recommendation-card h-100">
+                                    <div class="recommendation-icon">
+                                        <i class="bi bi-laptop-fill"></i>
+                                    </div>
+                                    <h5>Technical Skills</h5>
+                                    <p>Enhance your technical skills with industry-relevant certifications to stand out from other candidates.</p>
+                                    <div class="recommendation-links">
+                                        <a href="https://www.coursera.org/professional-certificates/google-it-support" target="_blank" class="btn btn-sm btn-outline-primary">Google IT</a>
+                                        <a href="https://www.coursera.org/professional-certificates/ibm-data-science" target="_blank" class="btn btn-sm btn-outline-primary">IBM Data Science</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="recommendation-card h-100">
+                                    <div class="recommendation-icon">
+                                        <i class="bi bi-people-fill"></i>
+                                    </div>
+                                    <h5>Networking</h5>
+                                    <p>Build your professional network to discover hidden opportunities and gain industry insights.</p>
+                                    <div class="recommendation-links">
+                                        <a href="https://www.linkedin.com/learning/" target="_blank" class="btn btn-sm btn-outline-primary">LinkedIn Learning</a>
+                                        <a href="https://www.meetup.com/" target="_blank" class="btn btn-sm btn-outline-primary">Meetup</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% else %}
+                        <!-- Recommendations for not placed students -->
+                        <div class="alert alert-warning">
+                            <h5><i class="bi bi-lightbulb-fill me-2"></i>Areas for Improvement</h5>
+                            <p>Based on our analysis, here are personalized recommendations to improve your placement chances:</p>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-4 mb-4">
+                                <div class="recommendation-card h-100">
+                                    <div class="recommendation-icon">
+                                        <i class="bi bi-mortarboard-fill"></i>
+                                    </div>
+                                    <h5>Academic Enhancement</h5>
+                                    <p>Focus on improving your academic performance, particularly in your degree and MBA courses.</p>
+                                    <div class="recommendation-links">
+                                        <a href="https://www.edx.org/course/subject/business-management" target="_blank" class="btn btn-sm btn-outline-primary">edX Business</a>
+                                        <a href="https://www.coursera.org/collections/top-free-courses" target="_blank" class="btn btn-sm btn-outline-primary">Coursera Free</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="recommendation-card h-100">
+                                    <div class="recommendation-icon">
+                                        <i class="bi bi-briefcase-fill"></i>
+                                    </div>
+                                    <h5>Work Experience</h5>
+                                    <p>Gain relevant work experience through internships, part-time jobs, or volunteering opportunities.</p>
+                                    <div class="recommendation-links">
+                                        <a href="https://internshala.com/" target="_blank" class="btn btn-sm btn-outline-primary">Internshala</a>
+                                        <a href="https://www.linkedin.com/jobs/" target="_blank" class="btn btn-sm btn-outline-primary">LinkedIn Jobs</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="recommendation-card h-100">
+                                    <div class="recommendation-icon">
+                                        <i class="bi bi-award-fill"></i>
+                                    </div>
+                                    <h5>Certifications</h5>
+                                    <p>Earn industry-recognized certifications to demonstrate your skills and commitment.</p>
+                                    <div class="recommendation-links">
+                                        <a href="https://www.udemy.com/courses/business/" target="_blank" class="btn btn-sm btn-outline-primary">Udemy</a>
+                                        <a href="https://www.google.com/search?q=google+digital+garage" target="_blank" class="btn btn-sm btn-outline-primary">Google Digital</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-4 mb-4">
+                                <div class="recommendation-card h-100">
+                                    <div class="recommendation-icon">
+                                        <i class="bi bi-graph-up-arrow"></i>
+                                    </div>
+                                    <h5>Employability Skills</h5>
+                                    <p>Improve your employability test scores through targeted practice and preparation.</p>
+                                    <div class="recommendation-links">
+                                        <a href="https://www.myamcat.com/" target="_blank" class="btn btn-sm btn-outline-primary">AMCAT</a>
+                                        <a href="https://www.aspiring-minds.com/" target="_blank" class="btn btn-sm btn-outline-primary">Aspiring Minds</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="recommendation-card h-100">
+                                    <div class="recommendation-icon">
+                                        <i class="bi bi-chat-square-text-fill"></i>
+                                    </div>
+                                    <h5>Communication Skills</h5>
+                                    <p>Enhance your verbal and written communication skills for better interview performance.</p>
+                                    <div class="recommendation-links">
+                                        <a href="https://www.toastmasters.org/" target="_blank" class="btn btn-sm btn-outline-primary">Toastmasters</a>
+                                        <a href="https://www.coursera.org/learn/speak-english-professionally" target="_blank" class="btn btn-sm btn-outline-primary">English Prof.</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="recommendation-card h-100">
+                                    <div class="recommendation-icon">
+                                        <i class="bi bi-person-workspace"></i>
+                                    </div>
+                                    <h5>Project Experience</h5>
+                                    <p>Build a portfolio of projects that demonstrate your skills and problem-solving abilities.</p>
+                                    <div class="recommendation-links">
+                                        <a href="https://github.com/" target="_blank" class="btn btn-sm btn-outline-primary">GitHub</a>
+                                        <a href="https://www.kaggle.com/" target="_blank" class="btn btn-sm btn-outline-primary">Kaggle</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="action-plan mt-5">
+                        <h4 class="section-title mb-4">Your Action Plan</h4>
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-marker"></div>
+                                <div class="timeline-content">
+                                    <h5>Short-term (1-3 months)</h5>
+                                    <ul>
+                                        {% if prediction == 'Placed' %}
+                                        <li>Prepare your resume and LinkedIn profile</li>
+                                        <li>Practice interview questions and scenarios</li>
+                                        <li>Research target companies and their requirements</li>
+                                        {% else %}
+                                        <li>Identify your weakest areas based on our analysis</li>
+                                        <li>Enroll in relevant online courses to address gaps</li>
+                                        <li>Seek internship or project opportunities</li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-marker"></div>
+                                <div class="timeline-content">
+                                    <h5>Medium-term (3-6 months)</h5>
+                                    <ul>
+                                        {% if prediction == 'Placed' %}
+                                        <li>Complete at least one industry certification</li>
+                                        <li>Build your professional network</li>
+                                        <li>Participate in mock interviews and placement workshops</li>
+                                        {% else %}
+                                        <li>Complete relevant certifications in your field</li>
+                                        <li>Improve your academic performance in current courses</li>
+                                        <li>Work on communication and soft skills</li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-marker"></div>
+                                <div class="timeline-content">
+                                    <h5>Long-term (6+ months)</h5>
+                                    <ul>
+                                        {% if prediction == 'Placed' %}
+                                        <li>Continuously update your skills to stay relevant</li>
+                                        <li>Seek mentorship from industry professionals</li>
+                                        <li>Consider advanced certifications or specializations</li>
+                                        {% else %}
+                                        <li>Build a portfolio of projects demonstrating your skills</li>
+                                        <li>Gain practical experience through internships</li>
+                                        <li>Retake the placement prediction with improved parameters</li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-5">
+                        <a href="{{ url_for('predict') }}" class="btn btn-outline-primary me-3">
+                            <i class="bi bi-arrow-left me-2"></i>Back to Prediction
+                        </a>
+                        <a href="{{ url_for('index') }}" class="btn btn-primary">
+                            <i class="bi bi-house-door me-2"></i>Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js for data visualization -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // FIRST CHART: Doughnut chart for placement chance
+        const placementChartCtx = document.getElementById('placementChartDoughnut').getContext('2d');
+        const placementChance = {{ session.prediction_data.confidence|default(77) }}; // Use actual confidence
+        
+        // Dynamic color based on percentage
+        let placementColor;
+        if (placementChance >= 75) {
+            placementColor = '#28a745'; // Green for high chance
+        } else if (placementChance >= 50) {
+            placementColor = '#ffc107'; // Yellow for medium chance
+        } else {
+            placementColor = '#dc3545'; // Red for low chance
+        }
+        
+        // Create the doughnut chart
+        const doughnutChart = new Chart(placementChartCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Placement Chance', 'Uncertainty'],
+                datasets: [{
+                    data: [placementChance, 100 - placementChance],
+                    backgroundColor: [placementColor, '#e9ecef'],
+                    borderWidth: 0,
+                    cutout: '70%'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.raw + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Add percentage text in the middle of the doughnut
+        Chart.register({
+            id: 'doughnutLabelPlugin',
+            beforeDraw: function(chart) {
+                if (chart.config.type !== 'doughnut') return;
+                
+                const width = chart.width;
+                const height = chart.height;
+                const ctx = chart.ctx;
+                
+                ctx.restore();
+                const fontSize = (height / 114).toFixed(2);
+                ctx.font = fontSize + 'em sans-serif';
+                ctx.textBaseline = 'middle';
+                
+                const text = placementChance + '%';
+                const textX = Math.round((width - ctx.measureText(text).width) / 2);
+                const textY = height / 2;
+                
+                ctx.fillStyle = placementColor;
+                ctx.fillText(text, textX, textY);
+                ctx.save();
+            }
+        });
+        
+        // SECOND CHART: Bar chart for factor importance (completely separate)
+        setTimeout(() => {
+            const factorChartCtx = document.getElementById('factorImportanceChart').getContext('2d');
+            
+            // Create the bar chart with no background percentages
+            const barChart = new Chart(factorChartCtx, {
+                type: 'bar',
+                data: {
+                    labels: [{% for feature in feature_importances %}'{{ feature.feature }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+                    datasets: [{
+                        label: 'Factor Importance (%)',
+                        data: [{% for feature in feature_importances %}{{ feature.importance }}{% if not loop.last %}, {% endif %}{% endfor %}],
+                        backgroundColor: [
+                            'rgba(78, 84, 200, 0.8)',
+                            'rgba(78, 84, 200, 0.7)',
+                            'rgba(78, 84, 200, 0.6)',
+                            'rgba(78, 84, 200, 0.5)',
+                            'rgba(78, 84, 200, 0.4)'
+                        ],
+                        borderColor: [
+                            'rgba(78, 84, 200, 1)',
+                            'rgba(78, 84, 200, 1)',
+                            'rgba(78, 84, 200, 1)',
+                            'rgba(78, 84, 200, 1)',
+                            'rgba(78, 84, 200, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 30,
+                            title: {
+                                display: true,
+                                text: 'Importance (%)'
+                            },
+                            ticks: {
+                                // Remove percentage values from y-axis
+                                callback: function(value) {
+                                    return value === 0 ? '0' : '';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.raw + '%';
+                                }
+                            },
+                            titleFont: {
+                                size: 14
+                            },
+                            bodyFont: {
+                                size: 14
+                            },
+                            backgroundColor: 'rgba(78, 84, 200, 0.9)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: 'rgba(78, 84, 200, 1)',
+                            borderWidth: 1
+                        }
+                    }
+                }
+            });
+        }, 100); // Small delay to ensure complete separation
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}Predict - Placement Predictor{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="section-title-container text-center mb-4">
+            <h3 class="section-title">Placement Prediction</h3>
+            <div class="section-divider"></div>
+            <p class="lead mt-3">Fill in your details below to get your personalized placement prediction</p>
+        </div>
+        
+        <div class="card prediction-form-card">
+            <div class="card-header">
+                <h4 class="text-center mb-0"><i class="bi bi-clipboard-data me-2"></i>Your Information</h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('predict') }}">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="sl_no" class="form-label">Serial Number (ID)</label>
+                            <input type="number" class="form-control" id="sl_no" name="sl_no" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="gender" class="form-label">Gender</label>
+                            <select class="form-select" id="gender" name="gender" required>
+                                <option value="" selected disabled>Select Gender</option>
+                                <option value="M">Male</option>
+                                <option value="F">Female</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="ssc_p" class="form-label">Secondary Education Percentage</label>
+                            <input type="number" step="0.01" min="0" max="100" class="form-control" id="ssc_p" name="ssc_p" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="ssc_b" class="form-label">Board of Education (10th)</label>
+                            <select class="form-select" id="ssc_b" name="ssc_b" required>
+                                <option value="" selected disabled>Select Board</option>
+                                <option value="Central">Central</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="hsc_p" class="form-label">Higher Secondary Education Percentage</label>
+                            <input type="number" step="0.01" min="0" max="100" class="form-control" id="hsc_p" name="hsc_p" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="hsc_b" class="form-label">Board of Education (12th)</label>
+                            <select class="form-select" id="hsc_b" name="hsc_b" required>
+                                <option value="" selected disabled>Select Board</option>
+                                <option value="Central">Central</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="hsc_s" class="form-label">Specialization in 12th</label>
+                            <select class="form-select" id="hsc_s" name="hsc_s" required>
+                                <option value="" selected disabled>Select Specialization</option>
+                                <option value="Commerce">Commerce</option>
+                                <option value="Science">Science</option>
+                                <option value="Arts">Arts</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="degree_p" class="form-label">Degree Percentage</label>
+                            <input type="number" step="0.01" min="0" max="100" class="form-control" id="degree_p" name="degree_p" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="degree_t" class="form-label">Type of Degree</label>
+                            <select class="form-select" id="degree_t" name="degree_t" required>
+                                <option value="" selected disabled>Select Degree Type</option>
+                                <option value="Sci&Tech">Science & Technology</option>
+                                <option value="Comm&Mgmt">Commerce & Management</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="workex" class="form-label">Work Experience</label>
+                            <select class="form-select" id="workex" name="workex" required>
+                                <option value="" selected disabled>Select Option</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="etest_p" class="form-label">Employability Test Percentage</label>
+                            <input type="number" step="0.01" min="0" max="100" class="form-control" id="etest_p" name="etest_p" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="specialisation" class="form-label">MBA Specialization</label>
+                            <select class="form-select" id="specialisation" name="specialisation" required>
+                                <option value="" selected disabled>Select Specialization</option>
+                                <option value="Mkt&Fin">Marketing & Finance</option>
+                                <option value="Mkt&HR">Marketing & HR</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="mba_p" class="form-label">MBA Percentage</label>
+                            <input type="number" step="0.01" min="0" max="100" class="form-control" id="mba_p" name="mba_p" required>
+                        </div>
+                    </div>
+
+                    <div class="form-section-divider my-4"></div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg prediction-submit-btn">
+                            <i class="bi bi-lightning-fill me-2"></i>Predict Placement
+                        </button>
+                        <small class="text-center text-muted mt-2">Our AI model will analyze your data and provide a prediction based on historical patterns</small>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
