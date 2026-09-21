@@ -8,16 +8,21 @@ import numpy as np
 import joblib
 import os
 from datetime import datetime
-import google.generativeai as genai
+try:
+    import google.generativeai as genai
+except ImportError:
+    genai = None
 
 # Initialize Flask app
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your-secret-key'  # Secret key for sessions and security
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'placement-predictor-development-key')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'  # Database URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Disable tracking to save resources
 
-# Configure Gemini API with API key
-genai.configure(api_key="AIzaSyDkkeFqxggpxHebLRPmPhu5PO_3OeDUXGg")
+# Gemini is optional. Set GEMINI_API_KEY in the environment to enable it.
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
+if genai and GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
 
 # Initialize database with SQLAlchemy
 db = SQLAlchemy(app)
@@ -44,6 +49,10 @@ def load_user(user_id):
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
 # Signup route (GET for form display, POST for form submission)
 @app.route('/signup', methods=['GET', 'POST'])
@@ -152,10 +161,17 @@ def predict():
                 if col in encoders:
                     input_data[col] = encoders[col].transform(input_data[col])
 
-            # Perform prediction
+            # Perform prediction and retain the information needed by recommendations.
             prediction = model.predict(input_data)[0]
+            probabilities = model.predict_proba(input_data)[0]
+            confidence = probabilities[1] if prediction == 'Placed' else probabilities[0]
+            session['prediction_data'] = {
+                'prediction': prediction,
+                'confidence': round(float(confidence) * 100, 2),
+                'input_data': request.form.to_dict()
+            }
 
-            return render_template('result.html', prediction=prediction)
+            return render_template('result.html', prediction=prediction, confidence=round(float(confidence) * 100, 2))
 
         except Exception as e:
             flash(f'Error in prediction: {str(e)}')
@@ -163,18 +179,51 @@ def predict():
 
     return render_template('predict.html')
 
-# Run this before the first request to create tables
-@app.before_first_request
-def create_tables():
+@app.route('/recommendation')
+@login_required
+def recommendation():
+    prediction_data = session.get('prediction_data')
+    if not prediction_data:
+        flash('Please make a prediction first.')
+        return redirect(url_for('predict'))
+
+    model = joblib.load('placement_model.pkl')
+    feature_names = ['sl_no', 'gender', 'ssc_p', 'ssc_b', 'hsc_p', 'hsc_b', 'hsc_s', 'degree_p', 'degree_t', 'workex', 'etest_p', 'specialisation', 'mba_p']
+    labels = {
+        'ssc_p': 'Secondary Education %', 'hsc_p': 'Higher Secondary %',
+        'degree_p': 'Degree Percentage', 'mba_p': 'MBA Percentage',
+        'etest_p': 'Employability Test %', 'workex': 'Work Experience',
+        'specialisation': 'MBA Specialization'
+    }
+    ranked = sorted(zip(feature_names, model.feature_importances_), key=lambda item: item[1], reverse=True)[:5]
+    feature_importances = [{'feature': labels.get(name, name.replace('_', ' ').title()), 'importance': round(float(value) * 100, 1)} for name, value in ranked]
+    return render_template('recommendation.html', prediction=prediction_data['prediction'], feature_importances=feature_importances, input_data=prediction_data['input_data'])
+
+def local_chat_response(message):
+    """Helpful fallback when no Gemini key is configured or its service is unavailable."""
+    text = message.lower()
+    if any(word in text for word in ('resume', 'cv')):
+        return 'Keep your resume to one page: lead with skills and projects, quantify outcomes, and tailor it to the job description.'
+    if any(word in text for word in ('interview', 'hr round', 'technical')):
+        return 'Prepare a 60-second introduction, use STAR examples for behavioral questions, and practise explaining two projects clearly.'
+    if any(word in text for word in ('placement', 'job', 'prepare', 'career')):
+        return 'Create a weekly plan: strengthen one technical skill, complete one project improvement, practise aptitude, and apply to relevant roles.'
+    return 'I can help with placement preparation, resumes, interviews, aptitude, projects, and career planning. What would you like to work on?'
+
+# Create tables during application setup (compatible with current Flask versions).
+with app.app_context():
     db.create_all()
 
 # Chatbot route using Gemini API
 @app.route('/chatbot', methods=['POST'])
 def chatbot():
+    user_message = (request.get_json(silent=True) or {}).get('message', '').strip()
+    if not user_message:
+        return jsonify({'error': 'Please enter a message.'}), 400
     try:
-        user_message = request.json.get('message', '')
+        if not (genai and GEMINI_API_KEY):
+            return jsonify({'response': local_chat_response(user_message)})
 
-        # Use Gemini's generative model
         model = genai.GenerativeModel('gemini-2.0-flash')
 
         # Define a context to keep chatbot focused on placement guidance
@@ -190,8 +239,8 @@ def chatbot():
         response = chat.send_message(f"{context}\n\nUser query: {user_message}")
 
         return jsonify({'response': response.text})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    except Exception:
+        return jsonify({'response': local_chat_response(user_message)})
 
 # Start Flask server
 if __name__ == '__main__':

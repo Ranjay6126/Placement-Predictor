@@ -3,11 +3,22 @@
 {% block title %}Home - Placement Predictor{% endblock %}
 
 {% block content %}
+<section class="welcome-screen">
+    <div class="welcome-card">
+        <div class="welcome-card-content">
+            <span class="eyebrow">Placement Prediction System</span>
+            <h1>Welcome to the Placement Prediction System</h1>
+            <div class="section-divider" aria-hidden="true"></div>
+            <p>Our system uses a Random Forest Classifier trained on historical placement data to predict your placement status based on your academic and personal information.</p>
+        </div>
+    </div>
+</section>
+
 <div class="home-banner">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-md-7">
-                <h1 class="mb-3"><img src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="Logo" class="header-logo"> AI-Powered Placement Prediction</h1>
+                <h1 class="mb-3 ai-title"><img src="{{ url_for('static', filename='placement.png') }}" alt="Placement Predictor logo" class="header-logo">AI-Powered Placement Prediction</h1>
                 <p class="lead">
                     Leverage the power of machine learning to predict your placement chances with high accuracy using our advanced Random Forest model.                
                 </p>
@@ -29,7 +40,7 @@
                     </div>
                     <div>Secure and personalized predictions</div>
                 </div>
-                {% if not session.username %}
+                {% if not current_user.is_authenticated %}
                 <div class="mt-5">
                     <a href="{{ url_for('login') }}" class="btn btn-light me-3">
                         <i class="bi bi-box-arrow-in-right me-2"></i>Login
@@ -67,30 +78,7 @@
     </div>
 </div>
 
-<div class="container">
-    <div class="row justify-content-center mb-5">
-        <div class="col-md-10">
-            <div class="card welcome-card">
-                <div class="card-header py-4">
-                    <h2 class="text-center">Welcome to the Placement Prediction System</h2>
-                </div>
-                <div class="card-body px-5 py-4">
-                    <p class="lead text-center mb-4">
-                        Our system uses a Random Forest Classifier trained on historical placement data to predict your placement status based on your academic and personal information.
-                    </p>
-                    
-                    {% if session.username %}
-                    <div class="text-center mb-4">
-                        <a href="{{ url_for('predict') }}" class="btn btn-primary btn-lg">
-                            <i class="bi bi-arrow-right-circle"></i> Start Prediction
-                        </a>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-    
+<div class="container-fluid px-0">
     <div class="section-title-container text-center mb-5">
         <h3 class="section-title">How It Works</h3>
         <div class="section-divider"></div>
@@ -214,22 +202,15 @@
                         The model takes into account various factors such as your academic performance, board of education, specialization, work experience, and more to provide a reliable prediction of your placement status.
                     </p>
                     
-                    {% if not session.username %}
                     <div class="mt-4">
-                        <a href="{{ url_for('signup') }}" class="btn btn-primary">
-                            <i class="bi bi-arrow-right-circle me-2"></i>Try It Now
+                        <a href="{{ url_for('predict') }}" class="btn btn-success start-prediction-btn">
+                            <i class="bi bi-arrow-right-circle me-2"></i>Start Prediction
                         </a>
                     </div>
-                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<footer class="footer mt-5">
-    <div class="container">
-        <p>© 2025 Placement Prediction System | Powered by AI</p>
-    </div>
-</footer>
 {% endblock %}

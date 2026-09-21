@@ -32,6 +32,14 @@
             transform: scale(1.1);
             box-shadow: 0 6px 20px rgba(78, 84, 200, 0.5);
         }
+
+        .chatbot-logo {
+            width: 42px;
+            height: 42px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, .8);
+        }
         
         .chatbot-container {
             position: fixed;
@@ -164,6 +172,11 @@
             50% { transform: translateY(-3px); }
             100% { transform: translateY(0px); }
         }
+
+        @media (max-width: 768px) {
+            .chatbot-container { right: 12px; bottom: 82px; width: calc(100vw - 24px); height: min(500px, calc(100vh - 110px)); }
+            .chatbot-button { right: 16px; bottom: 16px; }
+        }
     </style>
 </head>
 <body>
@@ -185,8 +198,8 @@
 
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="Logo" class="navbar-logo"> Placement Predictor</a>
+        <div class="container-fluid site-width">
+            <a class="navbar-brand" href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='placement.png') }}" alt="Placement Predictor logo" class="navbar-logo"> Placement Predictor</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -198,7 +211,7 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('about') }}"><i class="bi bi-info-circle"></i> About</a>
                     </li>
-                    {% if session.username %}
+                    {% if current_user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('predict') }}"><i class="bi bi-lightning"></i> Predict</a>
                     </li>
@@ -218,7 +231,7 @@
         </div>
     </nav>
 
-    <div class="container">
+    <main class="container-fluid site-width">
         {% with messages = get_flashed_messages() %}
         {% if messages %}
             {% for message in messages %}
@@ -231,13 +244,17 @@
         {% endwith %}
 
         {% block content %}{% endblock %}
-    </div>
+    </main>
+
+    <footer class="footer">
+        <p>© 2025 Placement Prediction System · Powered by Ranjay Prajapati</p>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Chatbot Button -->    
     <div class="chatbot-button" id="chatbotButton">
-        <i class="bi bi-chat-dots-fill"></i>
+        <img src="{{ url_for('static', filename='placement.png') }}" alt="Open Placement Assistant" class="chatbot-logo">
     </div>
     
     <!-- Chatbot Container -->
@@ -313,7 +330,11 @@
                     },
                     body: JSON.stringify({ message: message }),
                 })
-                .then(response => response.json())
+                .then(async response => {
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || 'Unable to send message');
+                    return data;
+                })
                 .then(data => {
                     // Hide typing indicator
                     typingIndicator.style.display = 'none';
@@ -337,37 +358,8 @@
                 messageDiv.classList.add('message');
                 messageDiv.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
                 
-                // Parse markdown if it's a bot message
-                if (sender === 'bot') {
-                    // First handle double asterisks for bold: **text**
-                    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                    
-                    // Then handle single asterisks for bold: *text*
-                    text = text.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
-                    
-                    // Handle italic text: _text_ or __text__
-                    text = text.replace(/__(.*?)__|_(.*?)_/g, function(match, p1, p2) {
-                        const content = p1 || p2;
-                        return `<em>${content}</em>`;
-                    });
-                    
-                    // Handle links: [text](url)
-                    text = text.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
-                    
-                    // Handle line breaks
-                    text = text.replace(/\n/g, '<br>');
-                    
-                    // Handle bullet points
-                    text = text.replace(/^\s*[-*]\s+(.*)/gm, '<li>$1</li>');
-                    text = text.replace(/<li>.*?<\/li>/gs, function(match) {
-                        return '<ul>' + match + '</ul>';
-                    });
-                    
-                    // Set innerHTML instead of textContent
-                    messageDiv.innerHTML = text;
-                } else {
-                    messageDiv.textContent = text;
-                }
+                // Treat remote model output as text, never as page markup.
+                messageDiv.textContent = text;
                 
                 chatbotMessages.appendChild(messageDiv);
                 chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
