@@ -172,8 +172,10 @@ body {
     background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     padding: 7px 0;
-    border-radius: 0 0 28px 28px;
+    border-radius: 18px;
     overflow: hidden;
+    width: calc(100% - 24px);
+    margin: 12px 12px 0;
 }
 
 .navbar-brand {
@@ -813,19 +815,17 @@ body {
 }
 
 .welcome-screen {
-    min-height: calc(100vh - 56px);
     display: grid;
     place-items: center;
-    padding: 2rem 0;
+    padding: 1.25rem 0;
 }
 
 .welcome-screen .welcome-card {
-    width: min(100%, 1080px);
-    min-height: min(58vh, 520px);
+    width: 100%;
     display: grid;
     place-items: center;
     margin: 0;
-    padding: clamp(2rem, 6vw, 5rem);
+    padding: clamp(1.25rem, 2.5vw, 2rem);
     background: linear-gradient(135deg, rgba(255,255,255,.98), rgba(238,240,255,.96));
     text-align: center;
 }
@@ -844,28 +844,37 @@ body {
 
 .welcome-card h1 {
     color: var(--primary-color);
-    font-size: clamp(2rem, 4.5vw, 3.5rem);
+    font-size: clamp(1.45rem, 2.2vw, 2rem);
     font-weight: 800;
     line-height: 1.15;
+    white-space: nowrap;
 }
 
 .welcome-card p {
-    margin: 1.8rem auto 0;
-    max-width: 760px;
+    margin: 1rem auto 0;
+    max-width: none;
     color: #505368;
-    font-size: clamp(1rem, 1.6vw, 1.2rem);
-    line-height: 1.8;
+    font-size: clamp(.58rem, .95vw, .9rem);
+    line-height: 1.5;
+    white-space: nowrap;
+    text-align: center;
 }
 
 .start-prediction-btn {
     padding: .8rem 1.45rem;
     font-weight: 700;
-    background: #198754;
-    border-color: #198754;
+    background: #42a96b;
+    border-color: #42a96b;
     box-shadow: 0 6px 16px rgba(25, 135, 84, .24);
 }
 
-.start-prediction-btn:hover { background: #157347; border-color: #157347; }
+.start-prediction-btn:hover { background: #2d8e54; border-color: #2d8e54; }
+
+.prediction-now-btn {
+    padding: .8rem 1.45rem;
+    font-weight: 700;
+    box-shadow: 0 6px 16px rgba(25, 135, 84, .28);
+}
 
 .home-banner .lead {
     font-size: 1.3rem;
@@ -1472,9 +1481,17 @@ body {
     }
 }
 
+@media (max-width: 900px) {
+    .welcome-card p {
+        white-space: normal;
+    }
+}
+
 @media (max-width: 768px) {
     .navbar {
-        border-radius: 0 0 20px 20px;
+        border-radius: 14px;
+        width: calc(100% - 16px);
+        margin: 8px 8px 0;
     }
 
     .navbar-collapse {
@@ -1524,6 +1541,11 @@ body {
     
     .home-banner h1 {
         font-size: 1.8rem;
+        white-space: normal;
+    }
+
+    .welcome-card h1,
+    .welcome-card p {
         white-space: normal;
     }
     
