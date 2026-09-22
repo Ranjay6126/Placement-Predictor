@@ -200,7 +200,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid site-width">
             <a class="navbar-brand" href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='placement.png') }}" alt="Placement Predictor logo" class="navbar-logo"> Placement Predictor</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -251,6 +251,19 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Close an expanded navigation menu immediately after a destination is chosen.
+        document.addEventListener('DOMContentLoaded', function () {
+            const navigation = document.getElementById('navbarNav');
+
+            navigation.querySelectorAll('.nav-link').forEach(function (link) {
+                link.addEventListener('click', function () {
+                    bootstrap.Collapse.getOrCreateInstance(navigation).hide();
+                });
+            });
+        });
+    </script>
 
     <!-- Chatbot Button -->    
     <div class="chatbot-button" id="chatbotButton">
@@ -321,6 +334,7 @@
                 
                 // Show typing indicator
                 typingIndicator.style.display = 'block';
+                sendButton.disabled = true;
                 
                 // Send message to backend
                 fetch('/chatbot', {
@@ -350,6 +364,11 @@
                     console.error('Error:', error);
                     typingIndicator.style.display = 'none';
                     addMessage('Sorry, I encountered an error. Please try again later.', 'bot');
+                })
+                .finally(() => {
+                    typingIndicator.style.display = 'none';
+                    sendButton.disabled = false;
+                    userInput.focus();
                 });
             }
             

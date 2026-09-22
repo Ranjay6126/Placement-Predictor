@@ -1,79 +1,53 @@
-AI-Powered Placement Predictor – Flask & Machine Learning
+# Placement Prediction System
 
-Placement Predictor is a full-stack web application that uses Machine Learning to predict a student’s placement status based on academic performance and personal attributes. The system is built with a Random Forest Classifier trained on historical placement data and delivered through a simple, responsive web interface.
+A Flask web application that estimates a student's placement outcome from academic and profile information. It uses a trained Random Forest classifier and provides an authenticated prediction workflow, follow-up recommendations, and a placement-preparation chatbot.
 
-This project combines Flask for the backend, HTML/CSS/Bootstrap for the frontend, and Scikit-learn for the ML model, making it a practical example of integrating AI into a real web application.
+## Features
 
-Key Features
+- Account signup, login, and logout with Flask-Login.
+- Placement predictions from 13 academic and profile inputs.
+- Result explanation, confidence score, feature-importance view, and tailored recommendations.
+- Responsive interface for desktop and mobile.
+- Placement Assistant chatbot for resume, interview, and career-preparation guidance. It works with a built-in guidance mode by default and can use Gemini when an API key is configured.
 
-Secure user signup and login with Flask-Login
+## Run locally
 
-AI-based placement prediction using Random Forest (~77% accuracy)
+1. Create and activate a Python virtual environment.
+2. Install the dependencies:
 
-Automatic preprocessing and encoding of categorical inputs
+   ```powershell
+   pip install -r requirements.txt
+   ```
 
-Clear prediction results with meaningful explanations
+3. Start the application:
 
-Responsive UI that works across devices
+   ```powershell
+   python app.py
+   ```
 
-Persistent data storage using SQLite and SQLAlchemy
+4. Open `http://127.0.0.1:5000/` in a browser.
 
-Tech Stack
+## Optional Gemini chatbot setup
 
-Backend
+The chatbot works without setup using placement-preparation guidance. To enable Gemini responses, provide a key before starting the app:
 
-Python, Flask
+```powershell
+$env:GEMINI_API_KEY = "your-api-key"
+python app.py
+```
 
-SQLite, SQLAlchemy ORM
+## Model and data
 
-Flask-Login for authentication
+The model uses these inputs: gender; secondary and higher-secondary percentages and boards; higher-secondary stream; degree type and percentage; work experience; employability-test percentage; MBA specialization and percentage.
 
-Machine Learning
+To retrain the model after updating the dataset, run:
 
-Scikit-learn
+```powershell
+python scripts/train_model.py
+```
 
-Random Forest Classifier
+The script reads `data/Placement_data_full_class.csv` and writes the updated model files into `models/`.
 
-Label Encoding & Data Preprocessing
+## Important note
 
-Frontend
-
-HTML, CSS
-
-Bootstrap 5
-
-JavaScript
-
-How the Model Works
-
-The prediction model is trained on a placement dataset using:
-
-Data cleaning and preprocessing
-
-Encoding categorical variables with saved encoders
-
-80/20 train-test split
-
-Model evaluation with ~77% accuracy
-
-Saving the trained model (placement_model.pkl) and encoders (encoders.pkl) for real-time predictions
-
-Input Parameters (13 Features)
-
-The model predicts placement status based on:
-
-Gender
-
-10th and 12th board and percentage
-
-12th stream specialization
-
-Degree type and percentage
-
-Work experience
-
-Employability test percentage
-
-MBA specialization and percentage
-
-And related academic attributes
+Predictions are estimates based on historical data. They are intended to help students focus their placement preparation and do not guarantee a placement outcome.
