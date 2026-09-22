@@ -44,7 +44,7 @@ To retrain the model after updating the dataset, run:
 powershell
 python scripts/train_model.py
 
-The script reads data/Placement_data_full_class.csv` and writes the updated model files into `models/.
+The script reads data/Placement_data_full_class.csv and writes the updated model files into models/.
 
 ## Important note
 
