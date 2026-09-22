@@ -15,26 +15,25 @@ A Flask web application that estimates a student's placement outcome from academ
 1. Create and activate a Python virtual environment.
 2. Install the dependencies:
 
-   ```powershell
+   powershell
    pip install -r requirements.txt
-   ```
+
 
 3. Start the application:
 
-   ```powershell
+   powershell
    python app.py
-   ```
 
-4. Open `http://127.0.0.1:5000/` in a browser.
+
+4. Open http://127.0.0.1:5000/ in a browser.
 
 ## Optional Gemini chatbot setup
 
 The chatbot works without setup using placement-preparation guidance. To enable Gemini responses, provide a key before starting the app:
 
-```powershell
+powershell
 $env:GEMINI_API_KEY = "your-api-key"
 python app.py
-```
 
 ## Model and data
 
@@ -42,11 +41,10 @@ The model uses these inputs: gender; secondary and higher-secondary percentages 
 
 To retrain the model after updating the dataset, run:
 
-```powershell
+powershell
 python scripts/train_model.py
-```
 
-The script reads `data/Placement_data_full_class.csv` and writes the updated model files into `models/`.
+The script reads data/Placement_data_full_class.csv` and writes the updated model files into `models/.
 
 ## Important note
 
