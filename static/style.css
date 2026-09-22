@@ -176,6 +176,9 @@ body {
     overflow: hidden;
     width: calc(100% - 24px);
     margin: 12px 12px 0;
+    position: sticky;
+    top: 8px;
+    z-index: 1030;
 }
 
 .navbar-brand {
@@ -856,8 +859,9 @@ body {
     color: #505368;
     font-size: clamp(.58rem, .95vw, .9rem);
     line-height: 1.5;
-    white-space: nowrap;
+    white-space: normal;
     text-align: center;
+    max-width: 900px;
 }
 
 .start-prediction-btn {
@@ -1487,20 +1491,67 @@ body {
     }
 }
 
+@media (max-width: 991.98px) {
+    /* Keep the brand and the three-line menu button on one row. */
+    .navbar .site-width {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .navbar-brand {
+        flex: 1 1 0;
+        min-width: 0;
+        font-size: clamp(.86rem, 4vw, 1.15rem);
+        letter-spacing: 0;
+        white-space: nowrap;
+    }
+
+    .navbar-logo {
+        width: 26px;
+        height: 26px;
+        margin-right: 7px;
+        flex: 0 0 auto;
+    }
+
+    .navbar-toggler {
+        flex: 0 0 auto;
+        margin-left: .5rem;
+    }
+
+    .navbar-collapse {
+        flex-basis: 100%;
+        width: 100%;
+        padding: .6rem 0 .25rem;
+    }
+
+    .navbar-nav {
+        width: 100%;
+        align-items: center;
+        text-align: center;
+    }
+
+    .navbar-nav .nav-item,
+    .navbar-nav .nav-link {
+        width: 100%;
+    }
+
+    .nav-link {
+        margin: 0;
+        padding: .55rem 0;
+    }
+
+    .nav-link::after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+}
+
 @media (max-width: 768px) {
     .navbar {
         border-radius: 14px;
         width: calc(100% - 16px);
         margin: 8px 8px 0;
-    }
-
-    .navbar-collapse {
-        padding: .5rem 0;
-    }
-
-    .nav-link {
-        margin: 0;
-        padding: .45rem 0;
     }
 
     .prediction-form-card .card-body {
