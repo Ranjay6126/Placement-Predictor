@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import joblib
 import os
+from pathlib import Path
 from datetime import datetime
 try:
     import google.generativeai as genai
@@ -15,6 +16,10 @@ except ImportError:
 
 # Initialize Flask app
 app = Flask(__name__)
+BASE_DIR = Path(__file__).resolve().parent
+MODEL_DIR = BASE_DIR / 'models'
+MODEL_PATH = MODEL_DIR / 'placement_model.pkl'
+ENCODERS_PATH = MODEL_DIR / 'encoders.pkl'
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'placement-predictor-development-key')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'  # Database URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Disable tracking to save resources
@@ -120,8 +125,8 @@ def predict():
     if request.method == 'POST':
         try:
             # Load trained model and encoders
-            model = joblib.load('placement_model.pkl')
-            encoders = joblib.load('encoders.pkl')
+            model = joblib.load(MODEL_PATH)
+            encoders = joblib.load(ENCODERS_PATH)
 
             # Get form inputs
             sl_no = int(request.form.get('sl_no'))
@@ -187,7 +192,7 @@ def recommendation():
         flash('Please make a prediction first.')
         return redirect(url_for('predict'))
 
-    model = joblib.load('placement_model.pkl')
+    model = joblib.load(MODEL_PATH)
     feature_names = ['sl_no', 'gender', 'ssc_p', 'ssc_b', 'hsc_p', 'hsc_b', 'hsc_s', 'degree_p', 'degree_t', 'workex', 'etest_p', 'specialisation', 'mba_p']
     labels = {
         'ssc_p': 'Secondary Education %', 'hsc_p': 'Higher Secondary %',
