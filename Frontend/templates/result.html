@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}Prediction Result - Placement Predictor{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center result-page-wrapper">
+    <div class="col-xl-10 col-lg-11">
+        <div class="result-main-card glass-card">
+            <div class="result-header glass-header">
+                <h2 class="result-title">Prediction Result</h2>
+                <p class="result-subtitle">Based on your academic profile and historical placement data</p>
+            </div>
+
+            <div class="result-body">
+                <div class="row g-4 align-items-stretch">
+                    <div class="col-md-5">
+                        <div class="verdict-card {% if prediction == 'Placed' %}verdict-placed{% else %}verdict-not-placed{% endif %}">
+                            <div class="verdict-icon-wrap">
+                                <i class="bi {% if prediction == 'Placed' %}bi-check-circle-fill{% else %}bi-x-circle-fill{% endif %} verdict-icon"></i>
+                            </div>
+                            <h3 class="verdict-text">
+                                {% if prediction == 'Placed' %}
+                                Likely to be <span>PLACED</span>
+                                {% else %}
+                                May Need <span>Improvement</span>
+                                {% endif %}
+                            </h3>
+                            <p class="verdict-note">
+                                {% if prediction == 'Placed' %}
+                                Your profile aligns strongly with successfully placed candidates.
+                                {% else %}
+                                Your profile can be improved with targeted effort in key areas.
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-7">
+                        <div class="confidence-card">
+                            <div class="confidence-header">
+                                <div>
+                                    <h5>Model Confidence</h5>
+                                    <span class="confidence-subtitle">Probability of this outcome</span>
+                                </div>
+                                <div class="confidence-pill {% if prediction == 'Placed' %}pill-success{% else %}pill-warning{% endif %}">
+                                    {{ confidence }}%
+                                </div>
+                            </div>
+
+                            <div class="confidence-meter-wrap">
+                                <div class="confidence-meter">
+                                    <div class="confidence-meter-fill {% if prediction == 'Placed' %}meter-success{% else %}meter-warning{% endif %}"
+                                         style="width: {{ confidence }}%;">
+                                        <span class="meter-fill-glow"></span>
+                                    </div>
+                                </div>
+                                <div class="meter-labels">
+                                    <span>0%</span>
+                                    <span>25%</span>
+                                    <span>50%</span>
+                                    <span>75%</span>
+                                    <span>100%</span>
+                                </div>
+                            </div>
+
+                            <div class="confidence-rings">
+                                <div class="ring-chart">
+                                    <svg viewBox="0 0 120 120" class="ring-svg">
+                                        <circle cx="60" cy="60" r="52" class="ring-bg"></circle>
+                                        <circle cx="60" cy="60" r="52"
+                                                class="ring-progress {% if prediction == 'Placed' %}ring-success{% else %}ring-warning{% endif %}"
+                                                stroke-dasharray="326.7"
+                                                stroke-dashoffset="{{ 326.7 - (326.7 * confidence / 100) }}">
+                                        </circle>
+                                    </svg>
+                                    <div class="ring-center">
+                                        <div class="ring-value">{{ confidence }}</div>
+                                        <div class="ring-unit">%</div>
+                                    </div>
+                                </div>
+                                <div class="ring-legend">
+                                    <div class="legend-row">
+                                        <span class="legend-dot dot-positive"></span>
+                                        <span>Placement Signal</span>
+                                        <strong>{% if prediction == 'Placed' %}High{% else %}Moderate-Low{% endif %}</strong>
+                                    </div>
+                                    <div class="legend-row">
+                                        <span class="legend-dot dot-neutral"></span>
+                                        <span>Uncertainty</span>
+                                        <strong>{{ 100 - confidence }}%</strong>
+                                    </div>
+                                    <div class="legend-note">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Historical model accuracy ~<strong>87%</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-5">
+                    {% if prediction == 'Placed' %}
+                    <div class="insight-card insight-success glass">
+                        <div class="insight-icon"><i class="bi bi-trophy-fill"></i></div>
+                        <div class="insight-content">
+                            <h5>Congratulations — Strong Profile!</h5>
+                            <p>Our AI model has analyzed your academic and personal information and determined that your profile is similar to candidates who were successfully placed in the past. While this prediction is based on historical data and has a high accuracy rate, the actual placement outcome may depend on additional factors such as interview performance, current job market conditions, and specific company requirements.</p>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="insight-card insight-warning glass">
+                        <div class="insight-icon"><i class="bi bi-lightbulb-fill"></i></div>
+                        <div class="insight-content">
+                            <h5>Areas for Improvement</h5>
+                            <p>Based on historical data, our AI model has identified that your profile may need some improvements to increase your chances of placement.</p>
+                            <ul>
+                                <li>Improve your academic performance, especially in your degree and MBA courses</li>
+                                <li>Gain relevant work experience through internships or part-time jobs</li>
+                                <li>Enhance your technical and soft skills through additional courses or certifications</li>
+                                <li>Prepare thoroughly for placement interviews and aptitude tests</li>
+                            </ul>
+                            <p class="mb-0">Remember, this prediction is a guide and not a definitive outcome. With focused efforts, you can improve your chances significantly.</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="result-actions">
+                    <div class="action-primary">
+                        <a href="{{ url_for('recommendation') }}" class="btn btn-success btn-action btn-recommend">
+                            <i class="bi bi-graph-up-arrow me-2"></i>Get Personalized Recommendations
+                        </a>
+                    </div>
+                    <div class="action-secondary">
+                        <a href="{{ url_for('predict') }}" class="btn btn-primary btn-action">
+                            <i class="bi bi-arrow-repeat me-2"></i>Make Another Prediction
+                        </a>
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-action">
+                            <i class="bi bi-house-door me-2"></i>Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
