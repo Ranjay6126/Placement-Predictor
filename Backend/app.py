@@ -23,7 +23,12 @@ MODEL_DIR = BASE_DIR / 'models'
 MODEL_PATH = MODEL_DIR / 'placement_model.pkl'
 ENCODERS_PATH = MODEL_DIR / 'encoders.pkl'
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'placement-predictor-development-key')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+if os.environ.get('VERCEL'):
+    # The deployed project directory is read-only; only /tmp is writable.
+    database_path = Path('/tmp/placement_predictor_users.db')
+else:
+    database_path = BASE_DIR / 'users.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{database_path.as_posix()}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SESSION_PERMANENT'] = True
 
