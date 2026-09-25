@@ -1,0 +1,19 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "builds": [
+    {
+      "src": "Backend/app.py",
+      "use": "@vercel/python",
+      "config": {
+        "includeFiles": "{Frontend/templates/**,Frontend/static/**,Backend/models/**}"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "Backend/app.py"
+    }
+  ]
+}
