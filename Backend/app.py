@@ -3,6 +3,9 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
 import pandas as pd
 import numpy as np
 import joblib
@@ -22,6 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent
 MODEL_DIR = BASE_DIR / 'models'
 MODEL_PATH = MODEL_DIR / 'placement_model.pkl'
 ENCODERS_PATH = MODEL_DIR / 'encoders.pkl'
+DATA_PATH = BASE_DIR / 'data' / 'Placement_data_full_class.csv'
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'placement-predictor-development-key')
 if os.environ.get('VERCEL'):
     # The deployed project directory is read-only; only /tmp is writable.
@@ -42,6 +46,44 @@ if genai and GEMINI_API_KEY:
 
 # Initialize database with SQLAlchemy
 db = SQLAlchemy(app)
+
+# Older sklearn pickles can fail to load after a runtime upgrade. Keep one
+# runtime-compatible model per function instance by training from the bundled
+# source dataset when that specific incompatibility occurs.
+_model_cache = None
+_encoders_cache = None
+
+
+def load_model_assets():
+    global _model_cache, _encoders_cache
+    if _model_cache is not None and _encoders_cache is not None:
+        return _model_cache, _encoders_cache
+
+    try:
+        model = joblib.load(MODEL_PATH)
+        encoders = joblib.load(ENCODERS_PATH)
+    except ValueError as error:
+        if 'incompatible dtype' not in str(error):
+            raise
+        data = pd.read_csv(DATA_PATH)
+        data = data.drop(columns=['salary']).fillna(data.mean(numeric_only=True))
+        features = data.drop(columns=['status'])
+        target = data['status']
+        encoders = {}
+        categorical_cols = ['gender', 'ssc_b', 'hsc_b', 'hsc_s', 'degree_t', 'workex', 'specialisation']
+        for column in categorical_cols:
+            encoder = LabelEncoder()
+            features[column] = encoder.fit_transform(features[column])
+            encoders[column] = encoder
+
+        x_train, _, y_train, _ = train_test_split(
+            features, target, test_size=0.2, random_state=42
+        )
+        model = RandomForestClassifier(n_estimators=100, random_state=42)
+        model.fit(x_train, y_train)
+
+    _model_cache, _encoders_cache = model, encoders
+    return _model_cache, _encoders_cache
 
 # Initialize login manager for handling user sessions
 login_manager = LoginManager()
@@ -136,8 +178,7 @@ def predict():
     if request.method == 'POST':
         try:
             # Load trained model and encoders
-            model = joblib.load(MODEL_PATH)
-            encoders = joblib.load(ENCODERS_PATH)
+            model, encoders = load_model_assets()
 
             # Get form inputs
             sl_no = int(request.form.get('sl_no'))
@@ -217,7 +258,7 @@ def recommendation():
         flash('Please make a prediction first.')
         return redirect(url_for('predict'))
 
-    model = joblib.load(MODEL_PATH)
+    model, _ = load_model_assets()
     feature_names = ['sl_no', 'gender', 'ssc_p', 'ssc_b', 'hsc_p', 'hsc_b', 'hsc_s', 'degree_p', 'degree_t', 'workex', 'etest_p', 'specialisation', 'mba_p']
     labels = {
         'ssc_p': 'Secondary Education %', 'hsc_p': 'Higher Secondary %',

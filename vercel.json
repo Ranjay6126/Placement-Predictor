@@ -6,7 +6,7 @@
       "src": "Backend/app.py",
       "use": "@vercel/python",
       "config": {
-        "includeFiles": "{Frontend/templates/**,Frontend/static/**,Backend/models/**}"
+        "includeFiles": "{Frontend/templates/**,Frontend/static/**,Backend/models/**,Backend/data/Placement_data_full_class.csv}"
       }
     }
   ],
